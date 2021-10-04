@@ -9,57 +9,63 @@ const port = process.env.PORT || 3000
 
 app.use(express.json())
 
-app.post('/users', (req, res) => {
+app.post('/users', async (req, res) => {
     const user = new User(req.body)
-    user.save().then(() => {
-        res.send(user)
-    }).catch((err) => {
+    try {
+        await user.save()
+        res.status(201).send(user)
+    }catch(err) {
         res.sendStatus(400)
-    })
+    }
 })
 
-app.get('/users', (req, res) =>{
-    User.find().then((users) => {
+app.get('/users', async (req, res) =>{
+    try {
+        let users = await User.find()
         res.send(users)
-    }).catch((err) => {
+    }catch(err) {
         res.sendStatus(500)
-    })
+    }
 })
 
-app.get('/users/:id', (req, res) => {
-    User.findById(req.params.id).then((user) => {
+app.get('/users/:id', async (req, res) => {
+    try {
+        let user = await User.findById(req.params.id)
         if(!user) return res.sendStatus(404)
         res.send(user)
-    }).catch((err) => {
+    }catch(err) {
         res.sendStatus(500)
-    })
+    }
 })
 
 
-app.post('/tasks', (req, res) => {
+app.post('/tasks', async (req, res) => {
     const task = new Task(req.body)
-    task.save().then(() => {
-        res.send(task)
-    }).catch((err) => {
-        res.status(400).send(task)
-    })
+    try {
+        await task.save()
+        res.status(201).send(task)
+    }catch(err) {
+        res.sendStatus(400)
+    }
 })
 
-app.get('/tasks', (req, res) => {
-    Task.find().then((tasks) => {
+app.get('/tasks', async (req, res) => {
+    try {
+        let tasks = await Task.find()
         res.send(tasks)
-    }).catch((err) => {
-        res.sendStatus(500)
-    })
+    }catch(err) {
+         res.sendStatus(500)
+    }
 })
 
 app.get('/tasks/:id', (req, res) => {
-    Task.findById(req.params.id).then((task) => {
+    try {
+        let task = await Task.findById(req.params.id)
         if(!task) return res.sendStatus(404)
         res.send(task)
-    }).catch((err) => {
+    }catch(err) {
         res.sendStatus(500)
-    })
+    }
 })
 
 app.listen(port, () => console.log(`Server is up on port ${port}`) )
