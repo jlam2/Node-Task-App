@@ -32,16 +32,19 @@ router.get('/users/:id', async (req, res) => {
 })
 
 router.patch('/users/:id', async (req, res) => {
+    const updates = Object.keys(req.body)
     const allowedProperties = ['name', 'email', 'password', 'age']
-    const isValidOperation = Object.keys(req.body).every((prop) => { 
-        return allowedProperties.includes(prop)
-    })
+    const isValidOperation = updates.every((prop) => allowedProperties.includes(prop))
 
     if(!isValidOperation) return res.status(400).send({error: 'Invalid properties in update'})
 
     try {
-        let user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        let user = await User.findById(req.params.id)
+
         if(!user) return res.sendStatus(404)
+
+        updates.forEach((update) => user[update] = req.body[update])
+        await user.save()
         res.send(user)
     }catch(err) {
         res.sendStatus(400)
