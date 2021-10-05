@@ -47,11 +47,21 @@ app.patch('/users/:id', async (req, res) => {
     if(!isValidOperation) return res.status(400).send({error: 'Invalid properties in update'})
 
     try {
-        let user = User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        let user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
         if(!user) return res.sendStatus(404)
         res.send(user)
     }catch(err) {
         res.sendStatus(400)
+    }
+})
+
+app.delete('/users/:id', async (req, res) => {
+    try {
+        let user = await User.findByIdAndDelete(req.params.id)
+        if(!user) return res.sendStatus(404)
+        res.send(user)
+    }catch(err) {
+        res.sendStatus(500)
     }
 })
 
@@ -93,11 +103,21 @@ app.patch('/tasks/:id', async (req, res) => {
     if(!isValidOperation) return res.status(400).send({error: 'Invalid properties in update'})
 
     try {
-        const task = Task.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        const task = await Task.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
         if(!task) return res.sendStatus(404)
         res.send(task)
     }catch(err) {
         res.sendStatus(400)
+    }
+})
+
+app.delete('/tasks/:id', async (req, res) => {
+    try {
+        let task = await Task.findByIdAndDelete(req.params.id)
+        if(!task) return res.sendStatus(404)
+        res.send(task)
+    }catch(err) {
+        res.sendStatus(500)
     }
 })
 
