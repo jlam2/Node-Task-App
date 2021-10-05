@@ -14,7 +14,7 @@ router.post('/tasks', async (req, res) => {
 
 router.get('/tasks', async (req, res) => {
     try {
-        let tasks = await Task.find()
+        const tasks = await Task.find()
         res.send(tasks)
     }catch(err) {
          res.sendStatus(500)
@@ -23,7 +23,7 @@ router.get('/tasks', async (req, res) => {
 
 router.get('/tasks/:id', async (req, res) => {
     try {
-        let task = await Task.findById(req.params.id)
+        const task = await Task.findById(req.params.id)
         if(!task) return res.sendStatus(404)
         res.send(task)
     }catch(err) {
@@ -53,7 +53,7 @@ router.patch('/tasks/:id', async (req, res) => {
 
 router.delete('/tasks/:id', async (req, res) => {
     try {
-        let task = await Task.findByIdAndDelete(req.params.id)
+        const task = await Task.findByIdAndDelete(req.params.id)
         if(!task) return res.sendStatus(404)
         res.send(task)
     }catch(err) {

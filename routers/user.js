@@ -12,9 +12,18 @@ router.post('/users', async (req, res) => {
     }
 })
 
+router.post('/users/login', async (req, res) => {
+    try {
+        const user = await User.findByCredentials(req.body.email, req.body.password)
+        res.send(user)
+    }catch(err) {
+        res.sendStatus(400)
+    }
+})
+
 router.get('/users', async (req, res) =>{
     try {
-        let users = await User.find()
+        const users = await User.find()
         res.send(users)
     }catch(err) {
         res.sendStatus(500)
@@ -23,7 +32,7 @@ router.get('/users', async (req, res) =>{
 
 router.get('/users/:id', async (req, res) => {
     try {
-        let user = await User.findById(req.params.id)
+        const user = await User.findById(req.params.id)
         if(!user) return res.sendStatus(404)
         res.send(user)
     }catch(err) {
@@ -39,7 +48,7 @@ router.patch('/users/:id', async (req, res) => {
     if(!isValidOperation) return res.status(400).send({error: 'Invalid properties in update'})
 
     try {
-        let user = await User.findById(req.params.id)
+        const user = await User.findById(req.params.id)
 
         if(!user) return res.sendStatus(404)
 
@@ -53,7 +62,7 @@ router.patch('/users/:id', async (req, res) => {
 
 router.delete('/users/:id', async (req, res) => {
     try {
-        let user = await User.findByIdAndDelete(req.params.id)
+        const user = await User.findByIdAndDelete(req.params.id)
         if(!user) return res.sendStatus(404)
         res.send(user)
     }catch(err) {
