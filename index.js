@@ -38,6 +38,22 @@ app.get('/users/:id', async (req, res) => {
     }
 })
 
+app.patch('/users/:id', async (req, res) => {
+    const allowedProperties = ['name', 'email', 'password', 'age']
+    const isValidOperation = Object.keys(req.body).every((prop) => { 
+        return allowedProperties.includes(prop)
+    })
+
+    if(!isValidOperation) return res.status(400).send({error: 'Invalid properties in update'})
+
+    try {
+        let user = User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        if(!user) return res.sendStatus(404)
+        res.send(user)
+    }catch(err) {
+        res.sendStatus(400)
+    }
+})
 
 app.post('/tasks', async (req, res) => {
     const task = new Task(req.body)
@@ -58,13 +74,30 @@ app.get('/tasks', async (req, res) => {
     }
 })
 
-app.get('/tasks/:id', (req, res) => {
+app.get('/tasks/:id', async (req, res) => {
     try {
         let task = await Task.findById(req.params.id)
         if(!task) return res.sendStatus(404)
         res.send(task)
     }catch(err) {
         res.sendStatus(500)
+    }
+})
+
+app.patch('/tasks/:id', async (req, res) => {
+    const allowedProperties = ['completed', 'description']
+    const isValidOperation = Object.keys(req.body).every((prop) => { 
+        return allowedProperties.includes(prop)
+    })
+
+    if(!isValidOperation) return res.status(400).send({error: 'Invalid properties in update'})
+
+    try {
+        const task = Task.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        if(!task) return res.sendStatus(404)
+        res.send(task)
+    }catch(err) {
+        res.sendStatus(400)
     }
 })
 
