@@ -41,6 +41,12 @@ const userSchema = new mongoose.Schema({
     }]
 })
 
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'userId'
+})
+
 userSchema.statics.findByCredentials = async function(email, password){
     const user = await User.findOne({email: email})
     
@@ -53,6 +59,17 @@ userSchema.statics.findByCredentials = async function(email, password){
 userSchema.methods.generateAuthToken = async function() {
     const token = jwt.sign({_id: this._id.toString()}, 'Bob')
     return token
+}
+
+
+//removes the password and tokens when sending User info in a response
+userSchema.methods.toJSON = function() {
+    let publicProfile = this.toObject()
+    
+    delete publicProfile.password
+    delete publicProfile.tokens
+    console.log(publicProfile)
+    return publicProfile
 }
 
 userSchema.pre('save', async function(next){
