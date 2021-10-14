@@ -1,7 +1,11 @@
 const express = require('express')
-const router = express.Router()
+const multer = require('multer')
+
 const User = require('../models/user')
 const auth = require('../middleware/authentication')
+
+const router = express.Router()
+const upload = multer({ dest: 'avatars'})
 
 router.post('/users', async (req, res) => {
     const user = new User(req.body)
@@ -41,7 +45,7 @@ router.post('/users/logout',  auth, async (req, res) => {
     }
 })
 
-router.post('/users/logoutAll',  auth, async (req, res) => {
+router.post('/users/logoutAll', auth, async (req, res) => {
     try {
         req.user.tokens = []
         await req.user.save()
@@ -50,6 +54,10 @@ router.post('/users/logoutAll',  auth, async (req, res) => {
     }catch(err) {
         res.sendStatus(500)
     }
+})
+
+router.post('/users/me/avatar', upload.single('avatar'), (req, res) => {
+    res.sendStatus(200)
 })
 
 router.get('/users/me', auth, async (req, res) =>{
