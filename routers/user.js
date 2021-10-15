@@ -1,5 +1,6 @@
 const express = require('express')
 const multer = require('multer')
+const sharp = require('sharp')
 
 const User = require('../models/user')
 const auth = require('../middleware/authentication')
@@ -13,8 +14,8 @@ const upload = multer({
         if(!file.originalname.match(/\.(jpg|jpeg|png)$/)) return cb(new Error("Only images are supported"))
 
         cb(undefined, true)
-        
-    }
+    },
+    storage: multer.memoryStorage()
 })
 
 router.post('/users', async (req, res) => {
@@ -118,6 +119,9 @@ router.post('/users/me/avatar',
     upload.single('avatar'), 
     async (req, res) => {
         req.user.avatar = req.file.buffer
+        //const buffer = await sharp(req.file.buffer).resize({width: 500, height: 500}).png().toBuffer()
+        req.user.avatar = buffer
+        
         await req.user.save()
 
         res.sendStatus(200)
@@ -140,13 +144,11 @@ router.get('/users/:id/avatar', async (req, res) => {
 
         if(!user || !user.avatar) throw new Error()
 
-        res.set('Content-Type', 'image/jpg')
+        res.set('Content-Type', 'image/png')
         res.send(user.avatar)
     }catch(err) {
         res.sendStatus(404)
     }
-
-
 })
 
 module.exports = router

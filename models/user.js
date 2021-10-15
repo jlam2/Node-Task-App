@@ -72,12 +72,13 @@ userSchema.methods.generateAuthToken = async function() {
     return token
 }
 
-//removes the password and tokens when sending User info in a response
+//removes the password, tokens and profile avatar when sending a user object in a response
 userSchema.methods.toJSON = function() {
     let publicProfile = this.toObject()
     
     delete publicProfile.password
     delete publicProfile.tokens
+    delete publicProfile.avatar
 
     return publicProfile
 }
