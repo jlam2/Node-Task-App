@@ -6,7 +6,6 @@ const auth = require('../middleware/authentication')
 
 const router = express.Router()
 const upload = multer({
-    dest: 'avatars',
     limits: {
         fileSize: 1000000
     },
@@ -67,30 +66,6 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     }
 })
 
-router.post('/users/me/avatar', 
-    upload.single('avatar'), 
-    (req, res) => {
-        res.sendStatus(200)
-    }, 
-    (err, req, res, next) => {
-        res.status(400).send(err)
-    }
-)
-
-router.get('/users/me', auth, async (req, res) => {
-    res.send(req.user)
-})
-
-// router.get('/users/:id', async (req, res) => {
-//     try {
-//         const user = await User.findById(req.params.id)
-//         if(!user) return res.sendStatus(404)
-//         res.send(user)
-//     }catch(err) {
-//         res.sendStatus(500)
-//     }
-// })
-
 router.patch('/users/me', auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedProperties = ['name', 'email', 'password', 'age']
@@ -122,6 +97,56 @@ router.delete('/users/me', auth, async (req, res) => {
     }catch(err) {
         res.sendStatus(500)
     }
+})
+
+router.get('/users/me', auth, async (req, res) => {
+    res.send(req.user)
+})
+
+// router.get('/users/:id', async (req, res) => {
+//     try {
+//         const user = await User.findById(req.params.id)
+//         if(!user) return res.sendStatus(404)
+//         res.send(user)
+//     }catch(err) {
+//         res.sendStatus(500)
+//     }
+// })
+
+router.post('/users/me/avatar',
+    auth,
+    upload.single('avatar'), 
+    async (req, res) => {
+        req.user.avatar = req.file.buffer
+        await req.user.save()
+
+        res.sendStatus(200)
+    }, 
+    (err, req, res, next) => {
+        res.status(400).send(err)
+    }
+)
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+    req.user.avatar = undefined
+    await req.user.save()
+
+    res.sendStatus(200)
+})
+
+router.get('/users/:id/avatar', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+
+        if(!user || !user.avatar) throw new Error()
+
+        res.set('Content-Type', 'image/jpg')
+        res.send(user.avatar)
+    }catch(err) {
+        res.sendStatus(404)
+    }
+
+
 })
 
 module.exports = router

@@ -36,15 +36,15 @@ const userSchema = new mongoose.Schema(
                 if(value.includes('password')) throw Error('Password cannot contain "password"')
             }
         },
+        avatar:{
+            type: Buffer
+        },
         tokens: [{
             token: {
                 type: String,
                 required: true
             }
-        }],
-        avatar:{
-            type: Buffer
-        }
+        }]
     },
     {
         timestamps: true
@@ -71,7 +71,6 @@ userSchema.methods.generateAuthToken = async function() {
     const token = jwt.sign({_id: this._id.toString()}, 'Bob')
     return token
 }
-
 
 //removes the password and tokens when sending User info in a response
 userSchema.methods.toJSON = function() {
