@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 
-mongoose.connect(process.env['MONGO_STRING'],)
+const mongoString = process.argv.includes('test') ? process.env['MONGO_STRING_TEST'] : process.env['MONGO_STRING']
+mongoose.connect(mongoString)
 
 
 
