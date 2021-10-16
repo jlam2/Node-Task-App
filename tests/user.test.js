@@ -16,6 +16,8 @@ beforeEach(async () => {
     .save()
 })
 
+afterAll(async () => await require('mongoose').disconnect() ) //close out open connections
+
 test('Should signup user', async () => {
     await request(app)
         .post('/users')
@@ -36,4 +38,15 @@ test('Should login existing user', async () => {
             password: '123456789'
         })
         .expect(200)
+})
+
+test('SShould not login non-existing user', async () => {
+    await request(app)
+        .post('/users/login')
+        .send({
+            name: 'John',
+            email: 'jjj@jjj.com',
+            password: '1234567891'
+        })
+        .expect(400)
 })
