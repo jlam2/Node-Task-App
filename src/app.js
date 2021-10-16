@@ -1,3 +1,4 @@
+//setups express and mongoose
 const express = require('express')
 
 require('./db/mongoose')
