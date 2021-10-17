@@ -6,7 +6,7 @@ const mongoString = process.argv.includes('test') ? process.env['MONGO_STRING_TE
 mongoose.connect(mongoString)
 
 const userRouter = require('../routers/user')
-const taskRouter = require('../routers/tasks')
+const taskRouter = require('../routers/task')
 
 const app = express()
 

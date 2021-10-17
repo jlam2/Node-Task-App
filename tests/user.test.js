@@ -1,28 +1,12 @@
 const request = require('supertest')
-const jwt = require('jsonwebtoken')
-const mongoose= require('mongoose')
+const mongoose = require('mongoose')
 
 const app =  require('../src/setup/app')
 const User = require('../src/models/user')
+const {testUserId, testUser, setupDB} = require('./db/db.js')
 
-const testUserId = new mongoose.Types.ObjectId()
-const testUser = {
-    _id: testUserId,
-    name: 'John',
-    email: 'jjj@jjj.com',
-    password: '123456789',
-    tokens: [{
-        token: jwt.sign({_id: testUserId}, process.env['JWT_SECRET']) 
-    }]
-}
-
-beforeEach(async () => {
-    await User.deleteMany() //clear the test database
-   
-    await new User(testUser).save()  //seed with dummy
-})
-
-afterAll(async () => await require('mongoose').disconnect() ) //close out open connections after tests
+beforeEach(async () => {await setupDB()}) //seed database with dummy data
+afterAll(async () => await mongoose.disconnect() ) //close out open connections after tests
 
 test('Should signup user', async () => {
     await request(app)
@@ -85,4 +69,23 @@ test('Shoud not delete unauthenticated user account', async () => {
         .delete('/users/me')
         .send()
         .expect(401)
+})
+
+test('Should update valid user fields', async () => {
+    await request(app)
+        .patch('/users/me')
+        .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
+        .send({name:'Kyle'})
+        .expect(200)
+
+    const user = await User.findById(testUserId)
+    expect(user.name).toBe('Kyle')
+})
+
+test('Should not update invalid user fields', async () => {
+    await request(app)
+        .patch('/users/me')
+        .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
+        .send({gender:'male'})
+        .expect(400)
 })
