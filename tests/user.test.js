@@ -75,6 +75,9 @@ test('Shoud delete authenticated user account', async () => {
         .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
         .send()
         .expect(200)
+
+    const user = await User.findById(testUserId)
+    expect(user).toBeNull()
 })
 
 test('Shoud not delete unauthenticated user account', async () => {
