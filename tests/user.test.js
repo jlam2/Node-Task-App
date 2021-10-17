@@ -1,22 +1,28 @@
 const request = require('supertest')
+const jwt = require('jsonwebtoken')
+const mongoose= require('mongoose')
 
 const app =  require('../src/setup/app')
 const User = require('../src/models/user')
 
+const testUserId = new mongoose.Types.ObjectId()
+const testUser = {
+    _id: testUserId,
+    name: 'John',
+    email: 'jjj@jjj.com',
+    password: '123456789',
+    tokens: [{
+        token: jwt.sign({_id: testUserId}, process.env['JWT_SECRET']) 
+    }]
+}
 
 beforeEach(async () => {
     await User.deleteMany() //clear the test database
-
-    //seed with dummy
-    await new User({
-        name: 'John',
-        email: 'jjj@jjj.com',
-        password: '123456789'
-    })
-    .save()
+   
+    await new User(testUser).save()  //seed with dummy
 })
 
-afterAll(async () => await require('mongoose').disconnect() ) //close out open connections
+afterAll(async () => await require('mongoose').disconnect() ) //close out open connections after tests
 
 test('Should signup user', async () => {
     await request(app)
@@ -40,7 +46,7 @@ test('Should login existing user', async () => {
         .expect(200)
 })
 
-test('SShould not login non-existing user', async () => {
+test('Should not login non-existing user', async () => {
     await request(app)
         .post('/users/login')
         .send({
@@ -49,4 +55,31 @@ test('SShould not login non-existing user', async () => {
             password: '1234567891'
         })
         .expect(400)
+})
+
+test('Should get authenticated user profile', async () => {
+    await request(app)
+        .get('/users/me')
+        .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
+        .send()
+        .expect(200)
+})
+
+test('Should not retrieve unathenticated user', async () => {
+    await request(app).get('/users/me').send().expect(401)
+})
+
+test('Shoud delete authenticated user account', async () => {
+    await request(app)
+        .delete('/users/me')
+        .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
+        .send()
+        .expect(200)
+})
+
+test('Shoud not delete unauthenticated user account', async () => {
+    await request(app)
+        .delete('/users/me')
+        .send()
+        .expect(401)
 })
